@@ -14,6 +14,7 @@
 
 <script setup lang="ts">
 import type { ICategory } from '~/types';
+import { useDebounce } from "~/utils";
 
 const props = defineProps<{
   searchQuery: string
@@ -29,13 +30,12 @@ const emit = defineEmits<{
 const searchQuery = ref(props.searchQuery);
 const selectedCategory = ref(props.selectedCategory);
 
-let searchTimeout
+const debouncedSearch = useDebounce((value: string) => {
+  emit('update:searchQuery', value);
+}, 500);
 
 const onSearchChange = (value: string) => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    emit('update:searchQuery', value);
-  }, 500);
+  debouncedSearch(value);
 };
 
 const onCategoryChange = (value: string) => {

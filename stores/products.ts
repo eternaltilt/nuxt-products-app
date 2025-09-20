@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { ICategory, IProduct, IProductResponse, TCategoriesResponse } from "~/types";
+import type { ICategory, IProduct, IProductResponse } from "~/types";
+import { productsApi } from '~/services/productsApi';
 
 export const useProductsStore = defineStore('products', () => {
     const products = ref<IProduct[]>([]);
@@ -19,18 +20,15 @@ export const useProductsStore = defineStore('products', () => {
         try {
             const calculatedSkip = currentPage.value * limit.value;
 
-            let url: string;
+            let data: IProductResponse;
 
             if (searchQuery.value) {
-                url = `https://dummyjson.com/products/search?q=${encodeURIComponent(searchQuery.value)}&limit=${limit.value}&skip=${calculatedSkip}`;
+                data = await productsApi.searchProducts(searchQuery.value, limit.value, calculatedSkip);
             } else if (selectedCategory.value) {
-                url = `https://dummyjson.com/products/category/${selectedCategory.value}?limit=${limit.value}&skip=${calculatedSkip}`;
+                data = await productsApi.getProductsByCategory(selectedCategory.value, limit.value, calculatedSkip);
             } else {
-                url = `https://dummyjson.com/products?limit=${limit.value}&skip=${calculatedSkip}`;
+                data = await productsApi.getAllProducts(limit.value, calculatedSkip);
             }
-
-            const response = await fetch(url);
-            const data = await response.json() as IProductResponse;
 
             if (currentPage.value === 0) {
                 products.value = data.products;
@@ -48,8 +46,7 @@ export const useProductsStore = defineStore('products', () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('https://dummyjson.com/products/categories');
-            categories.value = await response.json() as TCategoriesResponse;
+            categories.value = await productsApi.getCategories();
         } catch (err) {
             error.value = 'Ошибка при загрузке категорий';
             console.error('Ошибка загрузки категорий', err);
@@ -58,12 +55,7 @@ export const useProductsStore = defineStore('products', () => {
 
     const fetchProductById = async (id: string | number): Promise<IProduct | null> => {
         try {
-            const response = await fetch(`https://dummyjson.com/products/${id}`);
-
-            if (!response.ok) {
-                console.error('Ошибка при выполнении запроса')
-            }
-            return await response.json() as IProduct;
+            return await productsApi.getProductById(id);
         } catch (err) {
             console.error('Ошибка получения продукта', err);
             throw err;
