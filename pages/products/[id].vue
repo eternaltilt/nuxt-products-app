@@ -20,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-// НИКАКИХ ИМПОРТОВ РОУТЕРА! Nuxt 3 всё дает автоматически
+import type {IProduct} from "~/types";
+
 const route = useRoute();
 const router = useRouter();
 const productsStore = useProductsStore();
