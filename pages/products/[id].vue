@@ -20,10 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
-import { useProductsStore } from '~/stores/products';
-import type { IProduct } from "~/types";
-
+// НИКАКИХ ИМПОРТОВ РОУТЕРА! Nuxt 3 всё дает автоматически
 const route = useRoute();
 const router = useRouter();
 const productsStore = useProductsStore();
@@ -39,10 +36,8 @@ const fetchProduct = async () => {
   try {
     loading.value = true;
     error.value = null;
-
     product.value = await productsStore.fetchProductById(productId.value);
     productUrl.value = window.location.href;
-
   } catch (err) {
     error.value = 'Ошибка при получении товара';
   } finally {

@@ -1,20 +1,20 @@
 <template>
   <div class="flex gap-6 mb-8">
     <ProductCardSearchInput
-        v-model="searchQuery"
-        @update:modelValue="onSearchChange"
+        :model-value="searchQuery"
+        @update:model-value="debouncedSearch"
     />
     <ProductCategorySelect
-        v-model="selectedCategory"
+        :model-value="selectedCategory"
+        @update:model-value="$emit('update:selectedCategory', $event)"
         :categories="categories"
-        @update:modelValue="onCategoryChange"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ICategory } from '~/types';
-import { useDebounce } from "~/utils";
+import { useDebounce } from "~/composables";
 
 const props = defineProps<{
   searchQuery: string
@@ -27,26 +27,7 @@ const emit = defineEmits<{
   'update:selectedCategory': [value: string]
 }>();
 
-const searchQuery = ref(props.searchQuery);
-const selectedCategory = ref(props.selectedCategory);
-
 const debouncedSearch = useDebounce((value: string) => {
   emit('update:searchQuery', value);
 }, 500);
-
-const onSearchChange = (value: string) => {
-  debouncedSearch(value);
-};
-
-const onCategoryChange = (value: string) => {
-  emit('update:selectedCategory', value);
-};
-
-watch(() => props.searchQuery, (newValue) => {
-  searchQuery.value = newValue;
-});
-
-watch(() => props.selectedCategory, (newValue) => {
-  selectedCategory.value = newValue;
-});
 </script>
